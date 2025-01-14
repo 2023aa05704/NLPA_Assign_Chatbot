@@ -221,12 +221,23 @@ def extract_slots(user_response, intent):
                     extracted_slots[slot] = token.text
                     break
         elif slot == "product_name":
-            # Extract product name using Named Entities
+            # Try extracting product name using Named Entities
             for ent in doc.ents:
                 logging.debug(f"Entity: {ent}")
                 if ent.label_ in ["PRODUCT", "ORG", "GPE"]:
                     extracted_slots[slot] = ent.text
                     break
+            else:
+                # Fallback to extracting a group of nouns if no entity is found
+                noun_phrase = []
+                for token in doc:
+                    if token.pos_ in ["NOUN", "PROPN"]:
+                        noun_phrase.append(token.text)
+                    elif noun_phrase:
+                        break
+                if noun_phrase:
+                    extracted_slots[slot] = " ".join(noun_phrase)
+                    logging.debug(f"Fallback noun phrase: {' '.join(noun_phrase)}")
 
     logging.info(f'slots extracted: {extracted_slots}')
 
@@ -300,4 +311,4 @@ def get_response():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

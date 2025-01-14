@@ -6,4 +6,3 @@ transformers
 scikit-learn
 torch
 numpy
-ast
